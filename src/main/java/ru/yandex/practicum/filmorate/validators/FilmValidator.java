@@ -40,8 +40,7 @@ public class FilmValidator {
     private static boolean checkDuration(Film film) {
         if (film.getDuration() > 0) {
             return true;
-        }
-        else
+        } else
             throw new ValidationException("Длительность фильма не может быть отрицательной");
     }
 }
