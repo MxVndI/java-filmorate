@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -17,23 +18,25 @@ public class UserController {
     private final Map<Integer, User> users = new HashMap<>();
 
     @PostMapping
-    public User addUser(@RequestBody User user) {
-        if (UserValidator.isValidate(user)) {
+    public User addUser(@Valid @RequestBody User user) {
+        if (UserValidator.isValid(user)) {
             user.setId(getNextId());
             users.put(user.getId(), user);
-        } else
+        } else {
             throw new ValidationException("Непредвиденная ошибка..");
+        }
         return user;
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user) {
-        if (UserValidator.isValidate(user)) {
+    public User updateUser(@Valid @RequestBody User user) {
+        if (UserValidator.isValid(user)) {
             if (users.containsKey(user.getId()))
                 users.replace(user.getId(), user);
             else throw new ValidationException("Пользователя с таким id не существует");
-        } else
+        } else {
             throw new ValidationException("Непредвиденная ошибка..");
+        }
         return user;
     }
 

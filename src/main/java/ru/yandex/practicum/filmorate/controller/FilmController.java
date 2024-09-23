@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -17,23 +18,25 @@ public class FilmController {
     private final Map<Integer, Film> films = new HashMap<>();
 
     @PostMapping
-    public Film addFilm(@RequestBody Film film) {
-        if (FilmValidator.isValidate(film)) {
+    public Film addFilm(@Valid @RequestBody Film film) {
+        if (FilmValidator.isValid(film)) {
             film.setId(getNextId());
             films.put(film.getId(), film);
-        } else
+        } else {
             throw new ValidationException("Непредвиденная ошибка..");
+        }
         return film;
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film film) {
-        if (FilmValidator.isValidate(film)) {
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        if (FilmValidator.isValid(film)) {
             if (films.containsKey(film.getId())) {
                 films.replace(film.getId(), film);
             } else throw new ValidationException("Фильма с таким id не существует");
-        } else
+        } else {
             throw new ValidationException("Непредвиденная ошибка");
+        }
         return film;
     }
 
