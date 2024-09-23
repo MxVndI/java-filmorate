@@ -10,14 +10,14 @@ public class FilmTests {
 
     @Test
     void createFilmTest() {
-        Film film = new Film("utyuyt", "fdsfsdfdsfds", LocalDate.of(1999,2,5), 87);
+        Film film = new Film("utyuyt", "fdsfsdfdsfds", LocalDate.of(1999, 2, 5), 87);
         Assertions.assertNotNull(film);
     }
 
     @Test
     void equalsUsersTest() {
-        Film film1 = new Film("utyuyt", "fdsfsdfdsfds", LocalDate.of(1999,2,5), 87);
-        Film film2 = new Film("utyuyt", "fdsfsdfdsfds", LocalDate.of(1999,2,5), 87);
+        Film film1 = new Film("utyuyt", "fdsfsdfdsfds", LocalDate.of(1999, 2, 5), 87);
+        Film film2 = new Film("utyuyt", "fdsfsdfdsfds", LocalDate.of(1999, 2, 5), 87);
         Assertions.assertEquals(film1, film2);
     }
 }

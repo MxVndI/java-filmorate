@@ -12,7 +12,7 @@ public class FilmControllerTest {
 
     @Test
     void addFilmTest() {
-        Film film = new Film("utyuyt", "fdsfsdfdsfds", LocalDate.of(1999,2,5), 87);
+        Film film = new Film("utyuyt", "fdsfsdfdsfds", LocalDate.of(1999, 2, 5), 87);
         filmController.addFilm(film);
         Assertions.assertNotNull(filmController.getFilms());
     }

@@ -25,7 +25,7 @@ public class FilmValidator {
     }
 
     private static boolean checkDescription(Film film) {
-        if (film.getDescription() != null &&film.getDescription().length() <= MAX_DESCRIPTION_LENGTH)
+        if (film.getDescription() != null && film.getDescription().length() <= MAX_DESCRIPTION_LENGTH)
             return true;
         else {
             throw new ValidationException("Описание фильма не может быть длиннее 200 символов");
