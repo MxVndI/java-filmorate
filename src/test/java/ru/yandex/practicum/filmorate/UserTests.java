@@ -9,22 +9,16 @@ import java.time.LocalDate;
 public class UserTests {
 
     @Test
-    void createUserEmptyNameTest() {
+    void createUserTest() {
         User user = new User("ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
         Assertions.assertNotNull(user);
         Assertions.assertNotNull(user.getName());
     }
 
     @Test
-    void createUserTest() {
-        User user = new User("ahahaha", "ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
-        Assertions.assertNotNull(user);
-    }
-
-    @Test
     void equalsUsersTest() {
-        User user1 = new User("ahahaha", "ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
-        User user2 = new User("ahahaha", "ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
+        User user1 = new User("ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
+        User user2 = new User("ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
         Assertions.assertEquals(user1, user2);
     }
 }
