@@ -1,11 +1,11 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.model.Film;
-
-import java.time.LocalDate;
+//import org.junit.jupiter.api.Assertions;
+//import org.junit.jupiter.api.Test;
+//import ru.yandex.practicum.filmorate.controller.FilmController;
+//import ru.yandex.practicum.filmorate.model.Film;
+//
+//import java.time.LocalDate;
 
 public class FilmControllerTest {
     //FilmController filmController = new FilmController();
