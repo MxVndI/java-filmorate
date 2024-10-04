@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.Setter;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -10,7 +12,7 @@ import java.util.Set;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class Film {
+public class Film implements Comparable<Film> {
     private int id = 0;
     @NonNull
     private final String name;
@@ -24,5 +26,10 @@ public class Film {
 
     public int getCountLikes() {
         return likes.size();
+    }
+
+    @Override
+    public int compareTo(Film other) {
+        return Integer.compare(other.getCountLikes(), this.getCountLikes());
     }
 }

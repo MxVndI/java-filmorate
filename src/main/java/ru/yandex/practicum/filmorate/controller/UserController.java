@@ -15,14 +15,16 @@ import java.util.Collection;
 @Slf4j
 public class UserController {
     private final UserService userService;
+
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
+
         userService.addUser(user);
         return user;
     }
 
     @PutMapping
-    public User updateUser(@Valid  @RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
         userService.updateUser(user);
         return user;
     }
@@ -51,8 +53,14 @@ public class UserController {
     public Collection<User> getMutualFriends(@PathVariable("id") Integer id, @PathVariable("otherId") Integer otherId) {
         return userService.getMutualFriends(id, otherId);
     }
+
     @GetMapping("/{id}/friends")
     public Collection<User> getFriends(@PathVariable Integer id) {
         return userService.getUserFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/{friendId}")
+    public User getFriendById(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return userService.getUserById(friendId);
     }
 }

@@ -7,8 +7,8 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 
 @Data
 public class User {
@@ -29,4 +29,21 @@ public class User {
         this.birthday = birthday;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, login, email, birthday);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        User guest = (User) obj;
+        return id == (guest.getId()) && name.equals(guest.getName()) && login.equals(guest.getLogin()) &&
+                email.equals(guest.getEmail()) && birthday.equals(guest.birthday);
+    }
 }
