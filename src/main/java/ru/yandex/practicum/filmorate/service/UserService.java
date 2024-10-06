@@ -70,12 +70,13 @@ public class UserService {
         return mutualFriends.stream().map(user1 -> userStorage.getUserById(user1)).collect(Collectors.toList());
     }
 
-    public Collection<Integer> getUserFriends(Integer userId) {
+    public Collection<User> getUserFriends(Integer userId) {
         User user = userStorage.getUserById(userId);
         checkUserIsNotFound(user, userId);
         if (user == null)
             throw new NotFoundException("Нема такого");
-        return userStorage.getUserById(userId).getFriends();
+        return userStorage.getUserById(userId).getFriends().stream().map(user1 -> userStorage.getUserById(user1))
+                .collect(Collectors.toList());
     }
 
     private void checkUserIsNotFound(User user, Integer id) {
