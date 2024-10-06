@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -20,7 +21,7 @@ public class User {
     private String email;
     private LocalDate birthday;
     @JsonIgnore
-    public Set<User> friends = new HashSet<>();
+    private Set<Integer> friends = new HashSet<>();
 
     public User(String login, String email, LocalDate birthday) {
         this.name = login;

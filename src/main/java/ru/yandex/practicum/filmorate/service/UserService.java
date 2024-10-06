@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -43,25 +44,20 @@ public class UserService {
         return userStorage.getUsers();
     }
 
-    public User addFriend(Integer userId, Integer friendId) {
+    public void addFriend(Integer userId, Integer friendId) {
         User user = userStorage.getUserById(userId);
         User friendUser = userStorage.getUserById(friendId);
         checkIsCreatedObject(userId, friendId);
-        user.friends.add(friendUser);
-        userStorage.updateUser(user);
-        friendUser.friends.add(user);
-        userStorage.updateUser(friendUser);
-        return friendUser;
+        user.getFriends().add(friendId);
+        friendUser.getFriends().add(userId);
     }
 
     public User removeFriend(Integer userId, Integer friendId) {
         User user = userStorage.getUserById(userId);
         User friendUser = userStorage.getUserById(friendId);
         checkIsCreatedObject(userId, friendId);
-        user.friends.remove(friendUser);
-        userStorage.updateUser(user);
-        friendUser.friends.remove(user);
-        userStorage.updateUser(friendUser);
+        user.getFriends().remove(friendId);
+        friendUser.getFriends().remove(userId);
         return friendUser;
     }
 
@@ -69,12 +65,12 @@ public class UserService {
         User user = userStorage.getUserById(userId);
         User friendUser = userStorage.getUserById(otherId);
         checkIsCreatedObject(userId, otherId);
-        Set<User> mutualFriends = user.getFriends();
+        Set<Integer> mutualFriends = user.getFriends();
         mutualFriends.retainAll(friendUser.getFriends());
-        return mutualFriends;
+        return mutualFriends.stream().map(user1 -> userStorage.getUserById(user1)).collect(Collectors.toList());
     }
 
-    public Set<User> getUserFriends(Integer userId) {
+    public Collection<Integer> getUserFriends(Integer userId) {
         User user = userStorage.getUserById(userId);
         checkUserIsNotFound(user, userId);
         if (user == null)

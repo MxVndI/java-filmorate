@@ -18,9 +18,7 @@ public class UserController {
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-
-        userService.addUser(user);
-        return user;
+        return userService.addUser(user);
     }
 
     @PutMapping
@@ -55,7 +53,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<User> getFriends(@PathVariable Integer id) {
+    public Collection<Integer> getFriends(@PathVariable Integer id) {
         return userService.getUserFriends(id);
     }
 

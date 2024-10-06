@@ -22,7 +22,7 @@ public class Film implements Comparable<Film> {
     private final LocalDate releaseDate;
     @NonNull
     private final int duration;
-    private Set<User> likes = new HashSet<>();
+    private Set<Integer> likes = new HashSet<>();
 
     public int getCountLikes() {
         return likes.size();

@@ -12,10 +12,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,18 +46,14 @@ public class FilmService {
         checkIsCreatedObject(filmId, userId);
         if (filmStorage.getFilmById(filmId) == null)
             throw new NotFoundException("Нема такого");
-        if (!filmStorage.getFilmById(filmId).getLikes().contains(userStorage.getUserById(userId))) {
-            filmStorage.getFilmById(filmId).getLikes().add(userStorage.getUserById(userId));
-        } else {
+        if (!filmStorage.getFilmById(filmId).getLikes().add(userId)) {
             throw new LikeException("Пользователь уже ставил лайк этому фильму");
         }
     }
 
     public void removeLike(Integer filmId, Integer userId) {
         checkIsCreatedObject(filmId, userId);
-        if (filmStorage.getFilmById(filmId).getLikes().contains(userStorage.getUserById(userId))) {
-            filmStorage.getFilmById(filmId).getLikes().remove(userStorage.getUserById(userId));
-        } else {
+        if (!filmStorage.getFilmById(filmId).getLikes().remove(userId)) {
             throw new LikeException("Пользователь не ставил лайк этому фильму");
         }
     }
@@ -77,7 +70,7 @@ public class FilmService {
     public Set<Film> getPopularFilms(Integer count) {
         Set<Film> popularFilms = new TreeSet<>();
         popularFilms.addAll(filmStorage.getFilms());
-        if (count != null && popularFilms.size() >= count) {
+        if (count != null && popularFilms.size() >= count.intValue()) {
             popularFilms.stream().limit(count).collect(Collectors.toSet());
         } else if (popularFilms.size() >= 10) {
             popularFilms.stream().limit(10).collect(Collectors.toSet());
