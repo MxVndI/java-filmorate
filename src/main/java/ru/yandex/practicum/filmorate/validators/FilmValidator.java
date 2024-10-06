@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Slf4j
 public class FilmValidator {
@@ -14,6 +15,10 @@ public class FilmValidator {
 
     public static boolean isValid(Film film) {
         return (checkName(film) && checkDescription(film) && checkDuration(film) && checkReleaseDate(film));
+    }
+
+    public static boolean isFilmNull(Film film) {
+        return Objects.isNull(film);
     }
 
     private static boolean checkName(Film film) {

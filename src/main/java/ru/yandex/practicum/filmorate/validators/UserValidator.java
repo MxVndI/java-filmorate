@@ -5,12 +5,17 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Slf4j
 public class UserValidator {
 
     public static boolean isValid(User user) {
         return (checkMail(user) && checkLogin(user) && checkName(user) && checkBirthday(user));
+    }
+
+    public static boolean isUserNull(User user) {
+        return Objects.isNull(user);
     }
 
     private static boolean checkMail(User user) {
