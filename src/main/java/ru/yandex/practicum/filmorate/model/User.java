@@ -2,9 +2,13 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Data
 public class User {
@@ -15,6 +19,8 @@ public class User {
     @Email
     private String email;
     private LocalDate birthday;
+    @JsonIgnore
+    private Set<Integer> friends = new HashSet<>();
 
     public User(String login, String email, LocalDate birthday) {
         this.name = login;
@@ -23,4 +29,21 @@ public class User {
         this.birthday = birthday;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, login, email, birthday);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        User guest = (User) obj;
+        return id == (guest.getId()) && name.equals(guest.getName()) && login.equals(guest.getLogin()) &&
+                email.equals(guest.getEmail()) && birthday.equals(guest.birthday);
+    }
 }

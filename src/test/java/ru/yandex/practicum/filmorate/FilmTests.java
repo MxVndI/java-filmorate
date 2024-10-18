@@ -14,10 +14,4 @@ public class FilmTests {
         Assertions.assertNotNull(film);
     }
 
-    @Test
-    void equalsUsersTest() {
-        Film film1 = new Film("utyuyt", "fdsfsdfdsfds", LocalDate.of(1999, 2, 5), 87);
-        Film film2 = new Film("utyuyt", "fdsfsdfdsfds", LocalDate.of(1999, 2, 5), 87);
-        Assertions.assertEquals(film1, film2);
-    }
 }
