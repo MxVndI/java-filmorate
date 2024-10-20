@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friendship.FriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
@@ -15,8 +17,10 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Qualifier("userDbStorage")
 public class UserService {
     private final UserStorage userStorage;
+    private final FriendshipStorage friendshipStorage;
 
     public User addUser(User user) {
         if (!UserValidator.isValid(user))
@@ -45,29 +49,18 @@ public class UserService {
     }
 
     public void addFriend(Integer userId, Integer friendId) {
-        User user = userStorage.getUserById(userId);
-        User friendUser = userStorage.getUserById(friendId);
         checkIsCreatedObject(userId, friendId);
-        user.getFriends().add(friendId);
-        friendUser.getFriends().add(userId);
+        friendshipStorage.addFriend(userId, userId);
     }
 
-    public User removeFriend(Integer userId, Integer friendId) {
-        User user = userStorage.getUserById(userId);
-        User friendUser = userStorage.getUserById(friendId);
+    public void removeFriend(Integer userId, Integer friendId) {
         checkIsCreatedObject(userId, friendId);
-        user.getFriends().remove(friendId);
-        friendUser.getFriends().remove(userId);
-        return friendUser;
+        friendshipStorage.deleteFriend(userId, friendId);
     }
 
     public Collection<User> getMutualFriends(Integer userId, Integer otherId) {
-        User user = userStorage.getUserById(userId);
-        User friendUser = userStorage.getUserById(otherId);
         checkIsCreatedObject(userId, otherId);
-        Set<Integer> mutualFriends = user.getFriends();
-        mutualFriends.retainAll(friendUser.getFriends());
-        return mutualFriends.stream().map(user1 -> userStorage.getUserById(user1)).collect(Collectors.toList());
+        return userStorage.getMutualFriends(userId, otherId);
     }
 
     public Collection<User> getUserFriends(Integer userId) {
@@ -75,8 +68,7 @@ public class UserService {
         checkUserIsNotFound(user, userId);
         if (user == null)
             throw new NotFoundException("Нема такого");
-        return userStorage.getUserById(userId).getFriends().stream().map(user1 -> userStorage.getUserById(user1))
-                .collect(Collectors.toList());
+        return userStorage.getUserFriends(userId);
     }
 
     private void checkUserIsNotFound(User user, Integer id) {
