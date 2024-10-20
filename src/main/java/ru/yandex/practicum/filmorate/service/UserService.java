@@ -48,9 +48,10 @@ public class UserService {
         return userStorage.getUsers();
     }
 
-    public void addFriend(Integer userId, Integer friendId) {
+    public User addFriend(Integer userId, Integer friendId) {
         checkIsCreatedObject(userId, friendId);
         friendshipStorage.addFriend(userId, userId);
+        return userStorage.getUserById(friendId);
     }
 
     public void removeFriend(Integer userId, Integer friendId) {

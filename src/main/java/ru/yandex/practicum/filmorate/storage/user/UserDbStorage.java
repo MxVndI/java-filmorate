@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friendship.FriendshipStorage;
 
 import java.sql.PreparedStatement;
 import java.util.Collection;
@@ -15,6 +16,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 
+    private final FriendshipStorage friendshipStorage;
     private static final String USERS_SQL = "select * from users";
     private final JdbcTemplate jdbcTemplate;
 
@@ -64,14 +66,19 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
     public Collection<User> getUserFriends(Integer userId) {
-        final String sql = "select * from users where id in (select f.friend_id from users u join friendships f " +
+        final String sql = "select * from users where id in (select f.friend_id from users u join friendship f " +
                 "on u.id = f.user_id where u.id = ?)";
         return jdbcTemplate.query(sql, new UserMapper(), userId);
     }
 
+    @Override
+    public void addFriend(Integer userId, Integer friendId) {
+        friendshipStorage.addFriend(userId, friendId);
+    }
+
     public Collection<User> getMutualFriends(Integer user1Id, Integer user2Id) {
-        final String sql = "select * from users where id in (select friend_id from users u join friendships f on " +
-                "u.id = f.user_id where u.id = ?) and id in (select friend_id from users u join friendships f on " +
+        final String sql = "select * from users where id in (select friend_id from users u join friendship f on " +
+                "u.id = f.user_id where u.id = ?) and id in (select friend_id from users u join friendship f on " +
                 "u.id = f.user_id where u.id = ?)";
         return jdbcTemplate.query(sql, new UserMapper(), user1Id, user2Id);
     }

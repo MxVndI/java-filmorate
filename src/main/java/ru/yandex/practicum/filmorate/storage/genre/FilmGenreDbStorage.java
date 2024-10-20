@@ -29,9 +29,9 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
 
     @Override
-    public Collection<FilmGenre> getGenreById(Integer genreId) {
+    public FilmGenre getGenreById(Integer genreId) {
         final String sql = "select id, name from genres where id = ?";
-        return jdbcTemplate.query(sql, new FilmGenreMapper(), genreId);
+        return jdbcTemplate.queryForObject(sql, new FilmGenreMapper(), genreId);
     }
 
     @Override

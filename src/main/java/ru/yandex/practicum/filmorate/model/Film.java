@@ -17,8 +17,8 @@ public class Film implements Comparable<Film> {
     private final String description;
     private final LocalDate releaseDate;
     private final int duration;
-    private final Rating rating;
-    private final FilmGenre genre;
+    private final Integer mpaId;
+    private final Integer genreId;
     private Set<Integer> likes = new HashSet<>();
 
     public int getCountLikes() {

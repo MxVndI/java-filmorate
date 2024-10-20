@@ -7,7 +7,7 @@ import java.util.Collection;
 public interface FilmGenreStorage {
     void addGenre(String name);
 
-    Collection<FilmGenre> getGenreById(Integer id);
+    FilmGenre getGenreById(Integer id);
 
     void deleteGenreById(Integer id);
 

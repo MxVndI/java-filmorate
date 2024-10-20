@@ -29,8 +29,8 @@ public class FilmDbStorage implements FilmStorage {
             preparedStatement.setObject(2, film.getReleaseDate());
             preparedStatement.setString(3, film.getDescription());
             preparedStatement.setInt(4, film.getDuration());
-            preparedStatement.setInt(5, film.getRating().getId());
-            preparedStatement.setInt(6, film.getGenre().getId());
+            preparedStatement.setInt(5, film.getMpaId());
+            preparedStatement.setInt(6, film.getGenreId());
             return preparedStatement;
         }, generatedKeyHolder);
         int filmId = Objects.requireNonNull(generatedKeyHolder.getKey()).intValue();
@@ -59,8 +59,8 @@ public class FilmDbStorage implements FilmStorage {
                 film.getReleaseDate(),
                 film.getDescription(),
                 film.getDuration(),
-                film.getRating().getId(),
-                film.getGenre().getId(),
+                film.getMpaId(),
+                film.getGenreId(),
                 film.getId()
         );
         return film;

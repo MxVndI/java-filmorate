@@ -12,14 +12,13 @@ public class FriendshipDbStorage implements FriendshipStorage {
 
     @Override
     public void addFriend(Integer userId, Integer friendId) {
-        final String sql = "insert into friendship (user_id, friend_id) values (?, ?)";
-        jdbcTemplate.update(sql, userId, friendId);
+        final String sql = "insert into friendship (user_id, friend_id) values (" + userId + ", " + friendId + ")";
+        jdbcTemplate.execute(sql);
     }
 
     @Override
     public void deleteFriend(Integer userId, Integer friendId) {
         final String sql = "delete from friendship where user_id = ? and friend_id = ?";
-
         jdbcTemplate.update(sql, userId, friendId);
     }
 }

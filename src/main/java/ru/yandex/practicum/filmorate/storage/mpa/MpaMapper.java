@@ -1,16 +1,16 @@
-package ru.yandex.practicum.filmorate.storage.rating;
+package ru.yandex.practicum.filmorate.storage.mpa;
 
 import org.springframework.jdbc.core.RowMapper;
-import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class RatingMapper implements RowMapper<Rating> {
+public class MpaMapper implements RowMapper<Mpa> {
 
     @Override
-    public Rating mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return new Rating()
+    public Mpa mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return new Mpa()
                 .toBuilder()
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))

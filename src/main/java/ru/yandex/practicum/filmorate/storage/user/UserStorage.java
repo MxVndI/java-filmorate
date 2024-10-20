@@ -18,4 +18,6 @@ public interface UserStorage {
     Collection<User> getMutualFriends(Integer user1id, Integer user2id);
 
     Collection<User> getUserFriends(Integer userId);
+
+    void addFriend(Integer userId, Integer friendId);
 }
