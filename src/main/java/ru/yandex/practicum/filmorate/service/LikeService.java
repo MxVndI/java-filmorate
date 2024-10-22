@@ -7,13 +7,14 @@ import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 @Service
 @RequiredArgsConstructor
 public class LikeService {
+
     private final LikeStorage likeStorage;
 
-    public void addLikeToFilm(Integer filmId, Integer userId) {
-        likeStorage.addLikeToFilm(filmId, userId);
+    public void addLike(Integer filmId, Integer userId) {
+        likeStorage.addLike(filmId, userId);
     }
 
-    public void deleteLikeFromFilm(Integer filmId, Integer userId) {
-        likeStorage.deleteLikeFromFilm(filmId, userId);
+    public void removeLike(Integer filmId, Integer userId) {
+        likeStorage.removeLike(filmId, userId);
     }
 }

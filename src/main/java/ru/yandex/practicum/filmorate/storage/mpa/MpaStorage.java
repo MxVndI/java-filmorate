@@ -3,14 +3,10 @@ package ru.yandex.practicum.filmorate.storage.mpa;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface MpaStorage {
+    Optional<Mpa> getMpaById(Integer mpaId);
 
-    Collection<Mpa> getRatings();
-
-    void addRating(String name);
-
-    Mpa getRatingById(Integer id);
-
-    void deleteRatingById(Integer filmId);
+    Collection<Mpa> getAllMpa();
 }

@@ -1,42 +1,29 @@
 package ru.yandex.practicum.filmorate.storage.mpa;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dal.BaseRepository;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor
-public class MpaDbStorage implements MpaStorage {
+public class MpaDbStorage extends BaseRepository<Mpa> implements MpaStorage {
+    private static final String MPA_QUERY = "select * from mpa";
 
-    private final JdbcTemplate jdbcTemplate;
-
-
-    @Override
-    public Collection<Mpa> getRatings() {
-        final String sql = "select name from ratings";
-        return jdbcTemplate.query(sql, new MpaMapper());
+    public MpaDbStorage(JdbcTemplate jdbc, RowMapper<Mpa> mapper) {
+        super(jdbc, mapper);
     }
 
     @Override
-    public void addRating(String name) {
-        final String sql = "insert into ratings (name) values (?, ?)";
-
-        jdbcTemplate.update(sql, name);
+    public Optional<Mpa> getMpaById(Integer mpaId) {
+        return findOne(MPA_QUERY.concat(" WHERE id = ?"), mpaId);
     }
 
     @Override
-    public Mpa getRatingById(Integer genreId) {
-        final String sql =
-                "select name from rating where id = ?";
-        return jdbcTemplate.queryForObject(sql, new MpaMapper(), genreId);
-    }
-
-    @Override
-    public void deleteRatingById(Integer genreId) {
-        final String sql = "delete from ratings where genreId = ?";
-        jdbcTemplate.update(sql, genreId);
+    public Collection<Mpa> getAllMpa() {
+        return findMany(MPA_QUERY.concat(" ORDER BY id ASC"));
     }
 }

@@ -16,16 +16,17 @@ import java.util.Collection;
 @RequiredArgsConstructor
 @RequestMapping("/mpa")
 public class MpaController {
-
-    private final MpaService mpaService;
+    private final MpaService service;
 
     @GetMapping
-    public Collection<Mpa> getAllMpa() {
-        return mpaService.getAllRating();
+    public Collection<Mpa> getAll() {
+        log.info("Get request on all mpa");
+        return service.getAllMpa();
     }
 
     @GetMapping("/{id}")
-    public Mpa getMpaById(@PathVariable("id") Integer id) {
-        return mpaService.getRatingById(id);
+    public Mpa getMpaBYId(@PathVariable("id") Integer id) {
+        log.info("Get request on mpa by id={}", id);
+        return service.getMpaById(id);
     }
 }

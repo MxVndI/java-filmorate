@@ -1,81 +1,137 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.*;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.BaseRepository;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Like;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
-import java.sql.PreparedStatement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+@Component("filmDbStorage")
 @Slf4j
-@Component
-@RequiredArgsConstructor
-public class FilmDbStorage implements FilmStorage {
-    private static final String FILMS_SQL = "select * from films";
-    private final JdbcTemplate jdbcTemplate;
+@Repository
+public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
-    @Override
-    public Film addFilm(Film film) {
-        final String sql = "insert into films (name, release_date, description, duration, rating_id, genre_id) " +
-                "values (?, ?, ?, ?, ?, ?)";
-        KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
-            preparedStatement.setString(1, film.getName());
-            preparedStatement.setObject(2, film.getReleaseDate());
-            preparedStatement.setString(3, film.getDescription());
-            preparedStatement.setInt(4, film.getDuration());
-            preparedStatement.setInt(5, film.getMpaId());
-            preparedStatement.setInt(6, film.getGenreId());
-            return preparedStatement;
-        }, generatedKeyHolder);
-        int filmId = Objects.requireNonNull(generatedKeyHolder.getKey()).intValue();
-        film.setId(filmId);
-        return film;
+    private static final String FIND_ALL_QUERY = "SELECT f.*, m.id AS mpa_id, m.name AS mpa_name FROM films f " +
+            "LEFT JOIN mpa m ON f.mpa_id = m.id";
+    private static final String INSERT_QUERY = "INSERT INTO films (name, release_date, description, " +
+            "duration, mpa_id, rate) " +
+            "VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_QUERY = "UPDATE films SET name = ?, release_date = ?, description = ?, " +
+            "duration = ?, mpa_id = ?, rate = ? WHERE id = ?";
+
+    private final FilmGenreStorage filmGenreStorage;
+    private final MpaStorage mpaStorage;
+    private final LikeStorage likeStorage;
+
+    public FilmDbStorage(JdbcTemplate jdbc,
+                         RowMapper<Film> mapper,
+                         FilmGenreStorage filmGenreStorage,
+                         MpaStorage mpaStorage, LikeStorage likeStorage) {
+        super(jdbc, mapper);
+        this.filmGenreStorage = filmGenreStorage;
+        this.mpaStorage = mpaStorage;
+        this.likeStorage = likeStorage;
     }
 
     @Override
-    public Film getFilmById(Integer filmId) {
-        List<Film> films = jdbcTemplate.query(FILMS_SQL.concat(" where id = ?"), new FilmMapper(), filmId);
-        return films.get(0);
-    }
-
-    @Override
-    public Collection<Film> getFilms() {
-        Collection<Film> films = jdbcTemplate.query(FILMS_SQL, new FilmMapper());
-        return films;
-    }
-
-    @Override
-    public Film updateFilm(Film film) {
-        final String sql = "update films set name = ?, release_date = ?, description = ?, duration = ?, " +
-                "rating_id = ? genre_id = ? where id = ?";
-        jdbcTemplate.update(sql,
+    public Film save(Film film) {
+        Integer id = Math.toIntExact(insert(
+                INSERT_QUERY,
                 film.getName(),
                 film.getReleaseDate(),
                 film.getDescription(),
                 film.getDuration(),
-                film.getMpaId(),
-                film.getGenreId(),
+                film.getMpa().getId(),
+                film.getRate()
+        ));
+        film.setId(id);
+        return addFields(film);
+    }
+
+    @Override
+    public Film updateFilm(Film film) {
+        filmGenreStorage.deleteAllFilmGenresByFilmId(film.getId());
+        update(
+                UPDATE_QUERY,
+                film.getName(),
+                film.getReleaseDate(),
+                film.getDescription(),
+                film.getDuration(),
+                film.getMpa().getId(),
+                film.getRate(),
                 film.getId()
         );
-        return film;
+        return addFields(film);
     }
 
-    public Collection<Film> getPopularFilms(Integer count) {
-        String sql = "select count(*) from likes where film_id = ? order by count(*) desc limit ?";
-        Collection<Film> films = jdbcTemplate.query(String.format(sql), new FilmMapper(), count);
+    @Override
+    public Film getById(Integer filmId) {
+        Optional<Film> optionalFilm = findOne(FIND_ALL_QUERY.concat(" WHERE f.id = ?"), filmId);
+        if (optionalFilm.isEmpty()) {
+            throw new NotFoundException("Фильм под id=%s не найден");
+        } else {
+            return addFields(optionalFilm.get());
+        }
+    }
+
+    @Override
+    public Collection<Film> getFilms() {
+        Collection<Film> films = findMany(FIND_ALL_QUERY);
+        return setMultipleFilmsFields(films);
+    }
+
+    @Deprecated
+    @Override
+    public Film addLike(Integer filmId, Integer userId) {
+        return null;
+    }
+
+    @Deprecated
+    @Override
+    public void removeLike(Integer filmId, Integer userId) {
+
+    }
+
+    @Override
+    public List<Film> getMostPopular(Integer count) {
+        return null;
+    }
+
+    private Film addFields(Film film) {
+        Integer filmId = film.getId();
+        Integer mpaId = film.getMpa().getId();
+        if (film.getGenres() != null) {
+            film.getGenres().forEach(genre -> filmGenreStorage.addFilmGenre(filmId, genre.getId()));
+        }
+        Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresByFilmId(film.getId());
+        Mpa filmMpa = mpaStorage.getMpaById(mpaId).get();
+        Collection<Like> filmLikes = likeStorage.getLikesFilmId(filmId);
+        return film.toBuilder().mpa(filmMpa).genres(filmGenres).likes(filmLikes).build();
+    }
+
+    private Collection<Film> setMultipleFilmsFields(Collection<Film> films) {
+        Map<Integer, Collection<Genre>> filmGenresMap = filmGenreStorage.getAllFilmGenres(films);
+        films.forEach(film -> {
+            Integer filmId = film.getId();
+            film.setGenres(filmGenresMap.getOrDefault(filmId, new ArrayList<>()));
+            film.setLikes(likeStorage.getLikesFilmId(filmId));
+        });
+
         return films;
     }
-
-    public boolean deleteFilmById(Integer id) {
-        final String sql = "delete from films where id = ?";
-        int status = jdbcTemplate.update(sql, id);
-        return status != 0;
-    }
-
 }

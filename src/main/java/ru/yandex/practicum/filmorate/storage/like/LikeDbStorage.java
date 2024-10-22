@@ -2,34 +2,41 @@ package ru.yandex.practicum.filmorate.storage.like;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Like;
+
+import java.util.Collection;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class LikeDbStorage implements LikeStorage {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbc;
 
     @Override
-    public void addLikeToFilm(Integer filmId, Integer userId) {
-        final String sql = "insert into likes (film_id, user_id) values (?, ?)";
-
+    public void addLike(Integer filmId, Integer userId) {
+        final String insertQuery = "INSERT INTO likes (film_id, user_id) values (?, ?)";
+        final String increaseRateQuery = "UPDATE films SET rate = rate + 1 WHERE id = ?";
         try {
-            jdbcTemplate.update(sql, filmId, userId);
-            log.info("Пользователь с id = {} поставил лайк фильму с id = {}", userId, filmId);
-        }
-        catch (DuplicateKeyException ignored) {
-            log.warn("Пользователь с id = {} уже ставил лайк фильму с id = {}", userId, filmId);
+            jdbc.update(insertQuery, filmId, userId);
+            jdbc.update(increaseRateQuery, filmId);
+        } catch (Exception e) {
+            log.error("Error while adding like", e);
         }
     }
 
     @Override
-    public void deleteLikeFromFilm(Integer filmId, Integer userId) {
-        final String sql = "delete from likes where film_id = ? and user_id = ?";
+    public boolean removeLike(Integer filmId, Integer userId) {
+        final String deleteQuery = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
+        final String decreaseRateQuery = "UPDATE films SET rate = rate + 1 WHERE id = ?";
+        return ((jdbc.update(deleteQuery, filmId, userId) > 0) && (jdbc.update(decreaseRateQuery, filmId) > 0));
+    }
 
-        jdbcTemplate.update(sql, filmId, userId);
+    @Override
+    public Collection<Like> getLikesFilmId(Integer filmId) {
+        final String getLikesByFilmId = "SELECT * FROM likes WHERE film_id = ?";
+        return jdbc.query(getLikesByFilmId, new LikeMapper(), filmId);
     }
 }

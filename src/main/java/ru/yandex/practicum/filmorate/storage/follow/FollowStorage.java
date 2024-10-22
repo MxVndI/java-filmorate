@@ -1,6 +1,6 @@
-package ru.yandex.practicum.filmorate.storage.friendship;
+package ru.yandex.practicum.filmorate.storage.follow;
 
-public interface FriendshipStorage {
+public interface FollowStorage {
     void addFriend(Integer userId, Integer friendId);
 
     void deleteFriend(Integer userId, Integer friendId);

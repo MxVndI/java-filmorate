@@ -1,17 +1,18 @@
 package ru.yandex.practicum.filmorate.storage.genre;
 
 import org.springframework.jdbc.core.RowMapper;
-import ru.yandex.practicum.filmorate.model.FilmGenre;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class FilmGenreMapper implements RowMapper<FilmGenre> {
+@Component
+public class GenreRowMapper implements RowMapper<Genre> {
 
     @Override
-    public FilmGenre mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return new FilmGenre()
-                .toBuilder()
+    public Genre mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return Genre.builder()
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
                 .build();
