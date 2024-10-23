@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Like;
 
-import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -35,7 +35,7 @@ public class LikeDbStorage implements LikeStorage {
     }
 
     @Override
-    public Collection<Like> getLikesFilmId(Integer filmId) {
+    public List<Like> getLikesFilmId(Integer filmId) {
         final String getLikesByFilmId = "SELECT * FROM likes WHERE film_id = ?";
         return jdbc.query(getLikesByFilmId, new LikeMapper(), filmId);
     }

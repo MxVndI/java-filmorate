@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class FollowDbStorage implements FollowStorage {
+public class FriendsDbStorage implements FriendsStorage {
     private final JdbcTemplate jdbc;
 
     @Override

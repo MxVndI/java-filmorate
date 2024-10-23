@@ -2,12 +2,12 @@ package ru.yandex.practicum.filmorate.storage.like;
 
 import ru.yandex.practicum.filmorate.model.Like;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface LikeStorage {
     void addLike(Integer filmId, Integer userId);
 
     boolean removeLike(Integer filmId, Integer userId);
 
-    Collection<Like> getLikesFilmId(Integer filmId);
+    List<Like> getLikesFilmId(Integer filmId);
 }

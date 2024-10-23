@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public interface FilmGenreStorage {
@@ -14,5 +15,5 @@ public interface FilmGenreStorage {
 
     void deleteAllFilmGenresByFilmId(Integer filmId);
 
-    Map<Integer, Collection<Genre>> getAllFilmGenres(Collection<Film> films);
+    Map<Integer, List<Genre>> getAllFilmGenres(Collection<Film> films);
 }

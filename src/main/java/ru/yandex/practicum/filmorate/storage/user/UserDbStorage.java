@@ -6,7 +6,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.follow.FollowStorage;
+import ru.yandex.practicum.filmorate.storage.follow.FriendsStorage;
 
 import java.sql.PreparedStatement;
 import java.util.Collection;
@@ -16,7 +16,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 
-    private final FollowStorage followStorage;
+    private final FriendsStorage friendsStorage;
     private static final String USERS_SQL = "select * from users";
     private final JdbcTemplate jdbcTemplate;
 
@@ -74,7 +74,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(Integer userId, Integer friendId) {
-        followStorage.addFriend(userId, friendId);
+        friendsStorage.addFriend(userId, friendId);
     }
 
     public Collection<User> getMutualFriends(Integer user1Id, Integer user2Id) {

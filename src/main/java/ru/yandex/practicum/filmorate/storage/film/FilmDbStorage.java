@@ -49,7 +49,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public Film save(Film film) {
+    public Film addFilm(Film film) {
         Integer id = Math.toIntExact(insert(
                 INSERT_QUERY,
                 film.getName(),
@@ -80,7 +80,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public Film getById(Integer filmId) {
+    public Film getByFilmId(Integer filmId) {
         Optional<Film> optionalFilm = findOne(FIND_ALL_QUERY.concat(" WHERE f.id = ?"), filmId);
         if (optionalFilm.isEmpty()) {
             throw new NotFoundException("Фильм под id=%s не найден");
@@ -118,20 +118,19 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         if (film.getGenres() != null) {
             film.getGenres().forEach(genre -> filmGenreStorage.addFilmGenre(filmId, genre.getId()));
         }
-        Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresByFilmId(film.getId());
+        List<Genre> filmGenres = (List<Genre>) filmGenreStorage.getAllFilmGenresByFilmId(film.getId());
         Mpa filmMpa = mpaStorage.getMpaById(mpaId).get();
-        Collection<Like> filmLikes = likeStorage.getLikesFilmId(filmId);
+        List<Like> filmLikes = (List<Like>) likeStorage.getLikesFilmId(filmId);
         return film.toBuilder().mpa(filmMpa).genres(filmGenres).likes(filmLikes).build();
     }
 
-    private Collection<Film> setMultipleFilmsFields(Collection<Film> films) {
-        Map<Integer, Collection<Genre>> filmGenresMap = filmGenreStorage.getAllFilmGenres(films);
+    private List<Film> setMultipleFilmsFields(Collection<Film> films) {
+        Map<Integer, List<Genre>> filmGenresMap = filmGenreStorage.getAllFilmGenres(films);
         films.forEach(film -> {
             Integer filmId = film.getId();
-            film.setGenres(filmGenresMap.getOrDefault(filmId, new ArrayList<>()));
+            film.setGenres((List<Genre>) filmGenresMap.getOrDefault(filmId, new ArrayList<>()));
             film.setLikes(likeStorage.getLikesFilmId(filmId));
         });
-
-        return films;
+        return (List<Film>) films;
     }
 }

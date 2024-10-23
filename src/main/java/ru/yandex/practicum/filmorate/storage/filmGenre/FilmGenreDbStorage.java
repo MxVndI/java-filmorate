@@ -11,10 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreRowMapper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -55,11 +52,11 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
 
     @Override
-    public Map<Integer, Collection<Genre>> getAllFilmGenres(Collection<Film> films) {
+    public Map<Integer, List<Genre>> getAllFilmGenres(Collection<Film> films) {
         final String getAllQuery = "SELECT fg.film_id, g.id AS genre_id, g.name AS name FROM film_genre fg " +
                 "LEFT JOIN genres g ON fg.genre_id = g.id WHERE fg.film_id IN (%s)";
 
-        Map<Integer, Collection<Genre>> filmGenreMap = new HashMap<>();
+        Map<Integer, List<Genre>> filmGenreMap = new HashMap<>();
         Collection<String> ids = films.stream()
                 .map(film -> String.valueOf(film.getId()))
                 .toList();
@@ -73,7 +70,6 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
             filmGenreMap.putIfAbsent(filmId, new ArrayList<>());
             filmGenreMap.get(filmId).add(genre);
         });
-
         return filmGenreMap;
     }
 }
