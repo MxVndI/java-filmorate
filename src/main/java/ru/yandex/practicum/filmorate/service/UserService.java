@@ -1,42 +1,44 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.follow.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
+import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
+@Qualifier("userDbStorage")
+@Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private final FriendsStorage friendsStorage;
 
-    public User addUser(User user) {
-        if (!UserValidator.isValid(user))
-            throw new ValidationException("Некорректные данные");
+    public User addUser(@NonNull User user) {
+        validate(user);
         userStorage.addUser(user);
         return user;
     }
 
     public User updateUser(User user) {
-        if (!UserValidator.isValid(user))
-            throw new ValidationException("Некорректные данные");
-        checkIsCreatedObject(user.getId());
-        if (userStorage.getUserById(user.getId()) == null)
-            throw new NotFoundException("Нет пользователя с таким id");
+        if (userStorage.getUserById(user.getId()) == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+        validate(user);
         userStorage.updateUser(user);
         return user;
     }
 
-    public User getUserById(Integer userId) {
-        checkIsCreatedObject(userId);
+    public User getUserById(@NonNull Integer userId) {
+        validate(userStorage.getUserById(userId));
         return userStorage.getUserById(userId);
     }
 
@@ -45,59 +47,77 @@ public class UserService {
     }
 
     public void addFriend(Integer userId, Integer friendId) {
-        User user = userStorage.getUserById(userId);
-        User friendUser = userStorage.getUserById(friendId);
-        checkIsCreatedObject(userId, friendId);
-        user.getFriends().add(friendId);
-        friendUser.getFriends().add(userId);
+        validate(userId, friendId);
+        if (userStorage.getUserById(userId) != null && userStorage.getUserById(friendId) != null) {
+            validate(userStorage.getUserById(userId));
+            validate(userStorage.getUserById(friendId));
+            friendsStorage.addFriend(userId, friendId);
+        } else {
+            throw new NotFoundException("Такого пользователя не существует");
+        }
     }
 
-    public User removeFriend(Integer userId, Integer friendId) {
-        User user = userStorage.getUserById(userId);
-        User friendUser = userStorage.getUserById(friendId);
-        checkIsCreatedObject(userId, friendId);
-        user.getFriends().remove(friendId);
-        friendUser.getFriends().remove(userId);
-        return friendUser;
+    public void removeFriend(Integer userId, Integer friendId) {
+        if (userStorage.getUserById(friendId) == null) {
+            throw new NotFoundException("Нет пользователя");
+        }
+        if (userStorage.getUserById(userId) == null) {
+            throw new NotFoundException("Нет пользователя");
+        }
+        if (userStorage.getUserFriends(friendId) == null) {
+            throw new NotFoundException("Нет такого друга");
+        }
+        validate(getUserById(userId));
+        validate(getUserById(friendId));
+        friendsStorage.deleteFriend(userId, friendId);
     }
 
     public Collection<User> getMutualFriends(Integer userId, Integer otherId) {
-        User user = userStorage.getUserById(userId);
-        User friendUser = userStorage.getUserById(otherId);
-        checkIsCreatedObject(userId, otherId);
-        Set<Integer> mutualFriends = user.getFriends();
-        mutualFriends.retainAll(friendUser.getFriends());
-        return mutualFriends.stream().map(user1 -> userStorage.getUserById(user1)).collect(Collectors.toList());
+        validate(userId, otherId);
+        return userStorage.getMutualFriends(userId, otherId);
     }
 
     public Collection<User> getUserFriends(Integer userId) {
         User user = userStorage.getUserById(userId);
-        checkUserIsNotFound(user, userId);
         if (user == null)
             throw new NotFoundException("Нема такого");
-        return userStorage.getUserById(userId).getFriends().stream().map(user1 -> userStorage.getUserById(user1))
-                .collect(Collectors.toList());
+        return userStorage.getUserFriends(userId);
     }
 
-    private void checkUserIsNotFound(User user, Integer id) {
-        if (UserValidator.isUserNull(user)) {
-            throw new NotFoundException(String.format("Нема такого", id));
+    private void validate(User user) {
+        if (user.getEmail() == null) {
+            log.warn("Email is empty");
+            throw new ConditionsNotMetException("Имейл не должен быть пустым");
+        } else if (!user.getEmail().contains("@")) {
+            log.warn("Wrong email format (should contain '@')");
+            throw new ConditionsNotMetException("Неверный формат имейла (имейл должен содержать символ '@')");
+        } else if (user.getLogin() == null || user.getLogin().isBlank()) {
+            log.warn("Login is empty");
+            throw new ConditionsNotMetException("Логин не может быть пустым");
+        } else if (user.getLogin().contains(" ")) {
+            log.warn("Wrong login format (should not contain spaces)");
+            throw new ConditionsNotMetException("Неверный формат логина (логин не может содержать пробелы)");
+        } else if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.warn("User birthday cannot be in the future");
+            throw new ConditionsNotMetException("Дата рождения пользователя не может быть в будущем");
         }
     }
 
-    private void checkIsCreatedObject(Integer userId, Integer otherId) {
-        User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(otherId);
-        checkUserIsNotFound(friend, otherId);
-        checkUserIsNotFound(user, userId);
-        if (user == null || friend == null)
-            throw new NotFoundException("Нема");
+    private void validate(Integer id, Integer otherId) {
+        if (id == null) {
+            log.warn("Id is null");
+            throw new ConditionsNotMetException("Не указан id пользователя.");
+        } else if (otherId == null) {
+            log.warn("otherId is null");
+            throw new ConditionsNotMetException("Не указан id друга.");
+        }
     }
 
-    private void checkIsCreatedObject(Integer userId) {
-        User user = userStorage.getUserById(userId);
-        checkUserIsNotFound(user, userId);
-        if (user == null)
-            throw new NotFoundException("Нема");
+    private void validate(Integer id) {
+        if (id == null) {
+            log.warn("Id is null");
+            throw new ConditionsNotMetException("Не указан id пользователя.");
+        }
     }
+
 }

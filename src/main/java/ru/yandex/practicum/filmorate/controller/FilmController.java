@@ -3,7 +3,15 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -14,6 +22,7 @@ import java.util.Collection;
 @Slf4j
 @RequiredArgsConstructor
 public class FilmController {
+
     private final FilmService filmService;
 
     @PostMapping
@@ -32,7 +41,7 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void likeFilm(@PathVariable("id") Integer filmId, @PathVariable("userId") Integer userId) {
+    public void addLike(@PathVariable("id") Integer filmId, @PathVariable("userId") Integer userId) {
         filmService.addLike(filmId, userId);
     }
 
@@ -45,5 +54,10 @@ public class FilmController {
     public Collection<Film> getPopularFilms(
             @RequestParam(name = "count", defaultValue = "10", required = false) Integer count) {
         return filmService.getPopularFilms(count);
+    }
+
+    @GetMapping("/{filmId}")
+    public Film getFilmById(@PathVariable("filmId") Integer filmId) {
+        return filmService.getFilmById(filmId);
     }
 }

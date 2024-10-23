@@ -61,4 +61,5 @@ public class UserController {
     public User getFriendById(@PathVariable Integer id, @PathVariable Integer friendId) {
         return userService.getUserById(friendId);
     }
+
 }
