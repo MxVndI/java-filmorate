@@ -2,48 +2,49 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.controller.UserController;
-import ru.yandex.practicum.filmorate.model.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.follow.FriendsDbStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
+@SpringBootTest
 public class UserControllerTest {
-    UserStorage userStorage = new InMemoryUserStorage();
-    UserService userService = new UserService(userStorage);
+    JdbcTemplate jdbcTemplate = new JdbcTemplate();
+    FriendsDbStorage friendsDbStorage = new FriendsDbStorage(jdbcTemplate);
+    UserStorage userStorage = new UserDbStorage(friendsDbStorage, jdbcTemplate);
+    UserService userService = new UserService(userStorage, friendsDbStorage);
     UserController userController = new UserController(userService);
 
     @Test
-    void addUserTest() {
-        User user = new User("ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
-        userController.addUser(user);
-        Assertions.assertNotNull(userController.getUsers());
+    public void ifEmailIsBlankThrowException() {
+        User user = new User();
+        user.setEmail("");
+        Exception exception = Assertions.assertThrows(ValidationException.class, () -> userController.addUser(user));
     }
 
     @Test
-    void addUserFriendTest() {
-        User user = new User("ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
-        User user2 = new User("ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
-        userController.addUser(user);
-        userController.addUser(user2);
-        userController.addFriend(user.getId(), user2.getId());
-        Assertions.assertNotNull(userController.getFriends(user.getId()));
-        Assertions.assertNotNull(userController.getFriends(user2.getId()));
+    public void ifLoginIsBlankThrowException() {
+        User user = new User();
+        user.setEmail("abcd@gmail.com");
+        user.setLogin("");
+        Exception exception = Assertions.assertThrows(ValidationException.class, () -> userController.addUser(user));
+        Assertions.assertEquals("Логин не может быть пустым", exception.getMessage());
     }
 
     @Test
-    void removeUserFriendTest() {
-        User user = new User("ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
-        User user2 = new User("ozzinad", "fdsfds@fsd.cd", LocalDate.of(2004, 12, 4));
-        userController.addUser(user);
-        userController.addUser(user2);
-        userController.addFriend(user.getId(), user2.getId());
-        userController.removeFriend(user.getId(), user2.getId());
-        Assertions.assertEquals(userController.getFriends(user.getId()).size(), 0);
-        Assertions.assertEquals(userController.getFriends(user2.getId()).size(), 0);
+    public void ifBirthdayIsAfterInstantNowThrowException() {
+        User user = new User();
+        user.setEmail("abcd@gmail.com");
+        user.setLogin("abcd");
+        user.setBirthday(LocalDate.of(20000, 10, 10));
+        Exception exception = Assertions.assertThrows(ValidationException.class, () -> userController.addUser(user));
     }
-
 
 }

@@ -1,35 +1,28 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Setter;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.NonNull;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-@Getter
-@Setter
-@RequiredArgsConstructor
+@Data
+@EqualsAndHashCode(of = "name")
+@Builder(toBuilder = true)
 public class Film implements Comparable<Film> {
-    private int id = 0;
-    @NonNull
-    private final String name;
-    @NonNull
-    private final String description;
-    @NonNull
-    private final LocalDate releaseDate;
-    @NonNull
-    private final int duration;
-    private Set<Integer> likes = new HashSet<>();
-
-    public int getCountLikes() {
-        return likes.size();
-    }
+    private Integer id;
+    private String name;
+    private String description;
+    private LocalDate releaseDate;
+    private Integer duration;
+    private List<Like> likes;
+    private List<Genre> genres;
+    private Mpa mpa;
+    private Integer rate;
 
     @Override
     public int compareTo(Film other) {
-        return Integer.compare(other.getCountLikes(), this.getCountLikes());
+        return Integer.compare(other.getLikes().size(), this.getLikes().size());
     }
 }
